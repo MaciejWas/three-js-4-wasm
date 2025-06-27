@@ -1,2 +1,2 @@
-# three-js-rs
-THREE.js pseudo-bindings. Very thin wrapper around three-js which can be easily called from wasm
+# three-js-4-wasm
+THREE.js pseudo-bindings. This is a very thin wrapper around THREE.js which can be easily called from wasm.
