@@ -4,15 +4,15 @@
 import * as THREE from 'three';
 
 export const __OBJECTS = new Map<number, THREE.Object3D>();
-let nextObjId = 0;
+export let __nextObjId = 0;
 
-const __TEXTURES = new Map<string, THREE.Texture>();
+export const __TEXTURES = new Map<string, THREE.Texture>();
 
-let camera;
-let scene;
-let renderer;
+export let __camera: THREE.PerspectiveCamera;
+export let __scene: THREE.Scene;
+export let __renderer: THREE.WebGLRenderer;
 
-let textureLoader = new THREE.TextureLoader();
+export let textureLoader = new THREE.TextureLoader();
 
 export function init(
     camera: THREE.PerspectiveCamera,
@@ -42,7 +42,9 @@ export function createObject(
     materialClass: string,
     materialParams: string,
 ): number {
+    // @ts-ignore
     let geometryClassInstance = THREE[geometryClass];
+    // @ts-ignore
     let materialClassInstance = THREE[materialClass];
 
     // @ifdef ASSERTIONS
@@ -72,9 +74,9 @@ export function createObject(
         const material: THREE.Material = new materialClassInstance(...JSON.parse(materialParams));
         const mesh: THREE.Object3D = new THREE.Mesh(geometry, material);
 
-        const id = nextObjId++;
-        __OBJECTS.set(nextObjId, mesh);
-        nextObjId++;
+        const id = __nextObjId;
+        __OBJECTS.set(__nextObjId, mesh);
+        __nextObjId++;
         return id;
     } catch (error) {
         console.error(`Error creating object: ${error}`);
@@ -111,7 +113,7 @@ export function loadTexture(path: string): number {
  * @param rows - The number of rows in the sprite grid (default is 4).
  * @returns The unique ID of the created sprite, or -1 if the texture is not loaded.
  */
-export default function createSprite(
+export function createSprite(
     texturePath: string,
     columns: number = 4,
     rows: number = 4,
@@ -128,13 +130,18 @@ export default function createSprite(
     }
 
     texture.repeat.set(1 / columns, 1 / rows);
-    texture.userData = { columns, rows };
 
-    const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    const spriteMaterial = new THREE.SpriteMaterial({ 
+        map: texture.clone(), 
+        transparent: true
+    });
     const sprite: THREE.Object3D = new THREE.Sprite(spriteMaterial);
+    
+    sprite.userData = { columns, rows };
 
-    const id = nextObjId++;
-    __OBJECTS.set(nextObjId, sprite);
+    const id = __nextObjId;
+    __OBJECTS.set(__nextObjId, sprite);
+    __nextObjId++;
 
     return id;
 }
@@ -218,7 +225,7 @@ export function addObjectToScene(id: number): number {
         return -1;
     }
 
-    scene.add(object);
+    __scene.add(object);
     return 0;
 }
 
@@ -234,7 +241,7 @@ export function removeObjectFromScene(id: number): number {
         return -1;
     }
 
-    scene.remove(object);
+    __scene.remove(object);
     return 0;
 }
 
@@ -318,13 +325,13 @@ export async function runWasmModule(
     const { step } = mod.exports as Exports;
 
     // Ensure that all required THREE.js components are initialized
-    if (!scene || !camera || !renderer) {
+    if (!__scene || !__camera || !__renderer) {
         throw new Error("THREE.js scene, camera, or renderer is not initialized.");
     }
 
     const renderLoop = () => {
         step();
-        renderer.render(scene, camera);
+        __renderer.render(__scene, __camera);
         requestAnimationFrame(renderLoop);
     };
 
