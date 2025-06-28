@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2023-2024, Maciej Wasilewski
 
-// Oh Nisaba, keeper of tablets and wisdom, bless this tangled web of functions and promises. May my variables stay scoped, my errors be caught, and my logic flow like the rivers of Babylon.
-
 import * as THREE from 'three';
 
-const OBJECTS = new Map<number, THREE.Object3D>();
+export const __OBJECTS = new Map<number, THREE.Object3D>();
 let nextObjId = 0;
 
-const TEXTURES = new Map<string, THREE.Texture>();
+const __TEXTURES = new Map<string, THREE.Texture>();
 
 let camera;
 let scene;
@@ -75,7 +73,7 @@ export function createObject(
         const mesh: THREE.Object3D = new THREE.Mesh(geometry, material);
 
         const id = nextObjId++;
-        OBJECTS.set(nextObjId, mesh);
+        __OBJECTS.set(nextObjId, mesh);
         nextObjId++;
         return id;
     } catch (error) {
@@ -90,13 +88,13 @@ export function createObject(
  * If the texture is not loaded, it uses the THREE.TextureLoader to load the texture asynchronously.
  */
 export function loadTexture(path: string): number {
-    if (TEXTURES.has(path)) {
+    if (__TEXTURES.has(path)) {
         return -1;
     }
 
     textureLoader.loadAsync(path)
         .then((texture: THREE.Texture) => {
-            TEXTURES.set(path, texture);
+            __TEXTURES.set(path, texture);
         })
         .catch((error) => {
             console.error(`Failed to load texture from path ${path}:`, error);
@@ -118,12 +116,12 @@ export default function createSprite(
     columns: number = 4,
     rows: number = 4,
 ): number {
-    if (!TEXTURES.has(texturePath)) {
+    if (!__TEXTURES.has(texturePath)) {
         console.error(`Texture ${texturePath} not loaded.`);
         return -1;
     }
 
-    const texture = TEXTURES.get(texturePath);
+    const texture = __TEXTURES.get(texturePath);
     if (!texture) {
         console.error(`Texture ${texturePath} not found.`);
         return -1;
@@ -136,7 +134,7 @@ export default function createSprite(
     const sprite: THREE.Object3D = new THREE.Sprite(spriteMaterial);
 
     const id = nextObjId++;
-    OBJECTS.set(nextObjId, sprite);
+    __OBJECTS.set(nextObjId, sprite);
 
     return id;
 }
@@ -155,7 +153,7 @@ export function setPosition(
     y: number,
     z: number
 ): number {
-    const object = OBJECTS.get(id);
+    const object = __OBJECTS.get(id);
     if (!object) {
         console.error(`Object with ID ${id} not found.`);
         return -1;
@@ -179,7 +177,7 @@ export function setRotation(
     y: number,
     z: number
 ): number {
-    const object = OBJECTS.get(id);
+    const object = __OBJECTS.get(id);
     if (!object) {
         console.error(`Object with ID ${id} not found.`);
         return -1;
@@ -203,7 +201,7 @@ export function setScale(
     y: number,
     z: number
 ): number {
-    const object = OBJECTS.get(id);
+    const object = __OBJECTS.get(id);
     if (!object) {
         console.error(`Object with ID ${id} not found.`);
         return -1;
@@ -214,7 +212,7 @@ export function setScale(
 }
 
 export function addObjectToScene(id: number): number {
-    const object = OBJECTS.get(id);
+    const object = __OBJECTS.get(id);
     if (!object) {
         console.error(`Object with ID ${id} not found.`);
         return -1;
@@ -230,7 +228,7 @@ export function addObjectToScene(id: number): number {
  * @returns 0 if the object was removed successfully, or -1 if the object with the given ID was not found.
  */
 export function removeObjectFromScene(id: number): number {
-    const object = OBJECTS.get(id);
+    const object = __OBJECTS.get(id);
     if (!object) {
         console.error(`Object with ID ${id} not found.`);
         return -1;
@@ -256,7 +254,7 @@ export function setSpriteAnimationOffset(
     frameX: number,
     frameY: number
 ): number {
-    const object = OBJECTS.get(id);
+    const object = __OBJECTS.get(id);
     if (!object || !(object instanceof THREE.Sprite)) {
         console.error(`Object with ID ${id} is not a sprite or not found.`);
         return -1;
