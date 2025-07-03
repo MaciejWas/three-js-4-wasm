@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (c) 2023-2024, Maciej Wasilewski
+// Copyright (c) 2025, Maciej Wasilewski
 
 import * as THREE from 'three';
 
@@ -13,16 +13,6 @@ export let __scene: THREE.Scene;
 export let __renderer: THREE.WebGLRenderer;
 
 export let textureLoader = new THREE.TextureLoader();
-
-export function init(
-    camera: THREE.PerspectiveCamera,
-    scene: THREE.Scene,
-    renderer: THREE.WebGLRenderer
-) {
-    camera = camera;
-    scene = scene;
-    renderer = renderer;
-}
 
 /**
  * Creates a 3D object using the specified geometry and material classes and their parameters.
@@ -54,7 +44,7 @@ export function createObject(
     }
 
     if (geometryClassInstance.prototype instanceof THREE.BufferGeometry === false) {
-        console.error(`Material class ${materialClass} is not a Material.`);
+        console.error(`Geometry class ${geometryClass} is not a BufferGeometry.`);
         return -1;
     }
 
@@ -64,7 +54,7 @@ export function createObject(
     }
 
     if (materialClassInstance.prototype instanceof THREE.Material === false) {
-        console.error(`Geometry class ${geometryClass} is not a BufferGeometry.`);
+        console.error(`Material class ${materialClass} is not a Material.`);
         return -1;
     }
     // @endif
@@ -89,13 +79,18 @@ export function createObject(
  * If the texture is already loaded, it returns -1 to indicate that the texture is already present.
  * If the texture is not loaded, it uses the THREE.TextureLoader to load the texture asynchronously.
  */
-export function loadTexture(path: string): number {
+export function loadTexture(path: string, rows: number = 0, columns: number = 0): number {
     if (__TEXTURES.has(path)) {
         return -1;
     }
 
     textureLoader.loadAsync(path)
         .then((texture: THREE.Texture) => {
+            if (rows > 0 && columns > 0) {
+                texture.userData.rows = rows;
+                texture.userData.columns = columns;
+            }
+            
             __TEXTURES.set(path, texture);
         })
         .catch((error) => {
@@ -131,12 +126,12 @@ export function createSprite(
 
     texture.repeat.set(1 / columns, 1 / rows);
 
-    const spriteMaterial = new THREE.SpriteMaterial({ 
-        map: texture.clone(), 
+    const spriteMaterial = new THREE.SpriteMaterial({
+        map: texture.clone(),
         transparent: true
     });
     const sprite: THREE.Object3D = new THREE.Sprite(spriteMaterial);
-    
+
     sprite.userData = { columns, rows };
 
     const id = __nextObjId;
@@ -274,14 +269,72 @@ export function setSpriteAnimationOffset(
     }
 
     const { rows, columns } = texture.userData;
+
+    if (!rows || !columns) {
+        console.error(`Texture of Object ${id} is not animated (has no rows/cols)`)
+        return -1;
+    }
+
     texture.offset.x = texture.width * (frameX / columns);
     texture.offset.y = texture.height * (frameY / rows);
 
     return 0;
 }
 
+/** TODO: docs */
+/**
+ * Sets the position of the camera in the 3D scene.
+ * 
+ * @param x - The x-coordinate of the camera's position.
+ * @param y - The y-coordinate of the camera's position.
+ * @param z - The z-coordinate of the camera's position.
+ * @returns 0 if the position was set successfully, or -1 if the camera is not initialized.
+ */
+export function setCameraPosition(
+    x: number, y: number, z: number, 
+): number {
+    if (!__camera) {
+        return -1
+    }
+
+    __camera.position.set(x, y, z)
+
+    return 0;
+}
+
+
+/**
+ * Sets the camera to look at a specific point in the 3D scene.
+ * 
+ * @param x - The x-coordinate of the point to look at.
+ * @param y - The y-coordinate of the point to look at.
+ * @param z - The z-coordinate of the point to look at.
+ * @returns 0 if the camera was set to look at the point successfully, or -1 if the camera is not initialized.
+ */
+export function cameraLookAt(
+    x: number, y: number, z: number, 
+) {
+    if (!__camera) {
+        return -1;
+    }
+
+    __camera.lookAt(x, y, z);
+
+    return 0;
+}
+
+export function init(
+    camera: THREE.PerspectiveCamera,
+    scene: THREE.Scene,
+    renderer: THREE.WebGLRenderer
+) {
+    __camera = camera;
+    __scene = scene;
+    __renderer = renderer;
+}
+
 type Exports = {
-    step(): void;
+    step(ms: number): void;
 }
 
 /**
@@ -330,14 +383,14 @@ export async function runWasmModule(
     }
 
     const renderLoop = () => {
-        step();
+        step(20);
         __renderer.render(__scene, __camera);
         requestAnimationFrame(renderLoop);
     };
 
     renderLoop();
 
-    console.log("Render loop has started. Yeehaw!");
+    console.log("Render loop has started.");
 
     return mod;
 }
