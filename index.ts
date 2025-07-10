@@ -262,8 +262,7 @@ export const createContext = () => {
             return -1;
         }
 
-        texture.offset.x = texture.width * (frameX / columns);
-        texture.offset.y = texture.height * (frameY / rows);
+        texture.offset.set(frameX / columns, 1 - (frameY + 1) / rows);
 
         return 0;
     }
