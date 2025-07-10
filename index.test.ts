@@ -7,7 +7,6 @@ function mockTextureLoader(lib: any) {
     // mock texture loader so that it returns a dummy texture
     // @ts-ignore
     lib.textureLoader.loadAsync = function (path: string) {
-        console.log(`Mock loading texture from ${path}`);
         return new class extends THREE.Texture {
             constructor() {
                 super();
@@ -213,21 +212,7 @@ describe('setSpriteAnimationOffset', () => {
         const object = lib.__OBJECTS.get(spriteObjectId) as THREE.Sprite;
         expect(object.material.map!.offset.x).toBe(50);
         expect(object.material.map!.offset.y).toBe(100);
-
-        console.log(new THREE.Vector3(23, 32, 32.003123213).toArray().join("-"))
     })
-
-    // test('Sets sprite animation offset for a specific frame', () => {
-    //     const { lib, spriteObjectId, THREE } = createSpriteFixture();
-
-    //     const retcode = lib.setSpriteAnimationOffset(spriteObjectId, 1, 2);
-    //     expect(retcode).toBe(0);
-
-    //     const object = lib.__OBJECTS.get(spriteObjectId);
-    //     const texture = object.material.map;
-    //     expect(texture.offset.x).toBe(50);
-    //     expect(texture.offset.y).toBe(100);
-    // });
 });
 
 describe('setPosition', () => {

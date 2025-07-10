@@ -88,8 +88,6 @@ export const createContext = () => {
             return -1;
         }
 
-        console.log(`Loading texture from ${path} with id ${id}`);
-
         const texture = await textureLoader.loadAsync(path);
         
         if (rows || columns) {
