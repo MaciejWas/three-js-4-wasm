@@ -2,7 +2,9 @@
 // Copyright (c) 2025, Maciej Wasilewski
 
 import * as THREE from 'three';
-
+/**
+ * Creates a context for the Three.js library, providing methods to create and manipulate 3D objects, textures, and scenes.
+ */
 export const createContext = () => {
     /** 3D OBJECTS */
     const __OBJECTS = new Map<number, THREE.Object3D>();
@@ -21,7 +23,13 @@ export const createContext = () => {
     const utf8Decoder = new TextDecoder("utf-8");
     const textureLoader = new THREE.TextureLoader();
 
-    /** BINDINGS */
+    /* BINDINGS */
+
+    /** Initialized a THREE.Mesh object. It is not added to scene by default.
+     * @param geometry - The type of geometry to use for the object, specified by GeometryClass enum.
+     * @param material - The type of material to use for the object, specified by MaterialClass enum.
+     * @returns The ID of the created object, or -1 if an error occurred.
+     */
     function createObject(geometry: GeometryClass, material: MaterialClass): number {
         const geometryClass = GeometryClass[geometry];
         const materialClass = MaterialClass[material];
@@ -47,13 +55,11 @@ export const createContext = () => {
     }
 
     /**
-     * This function should be called before wasm module is run.
+     * This function is not meant to be called from WASM.
      * 
      * Loads a texture from the specified path and stores it in the TEXTURES map.
-     * If the texture is already loaded, it returns -1 to indicate that the texture is already present.
-     * If the texture is not loaded, it uses the THREE.TextureLoader to load the texture asynchronously.
      * 
-     * @param path - The path to the texture file.
+     * @param path - The URL to the texture file.
      * @param rows - The number of rows in the texture grid (optional)
      * @param columns - The number of columns in the texture grid (optional)
      */
@@ -65,6 +71,11 @@ export const createContext = () => {
 
         if (__TEXTURES.has(id)) {
             console.warn(`Texture with ID ${id} already exists.`);
+            return -1;
+        }
+
+        if ((rows && !columns) || (!rows && columns)) {
+            console.warn(`Either both rows and columns must be specified or none of them.`);
             return -1;
         }
 

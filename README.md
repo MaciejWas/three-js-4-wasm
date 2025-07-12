@@ -1,8 +1,7 @@
 # three-js-4-wasm
-THREE.js pseudo-bindings. This is a very thin wrapper around THREE.js which can be easily called from wasm.
+THREE.js pseudo-bindings. This is a very thin wrapper around THREE.js which can be easily called from wasm as all exported functions accept/return integers.
 
 ## Example (not working yet)
-
 
 ```rs
 use three_js_4_wasm::ctx;
