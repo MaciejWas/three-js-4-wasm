@@ -6,9 +6,11 @@ import * as THREE from 'three';
 export const createContext = () => {
     /** 3D OBJECTS */
     const __OBJECTS = new Map<number, THREE.Object3D>();
-    let __nextObjId = 0;
     const __TEXTURES = new Map<number, THREE.Texture>();
     const __LOADED_TEXTURES = new Set<string>();
+
+    /** COUNTERS */
+    let __nextObjId = 0;
 
     /** THREE.JS MAIN OBJECTS */
     let __camera: THREE.PerspectiveCamera;
@@ -29,31 +31,9 @@ export const createContext = () => {
         // @ts-ignore
         let materialClassInstance = THREE[materialClass];
 
-        // @ifdef ASSERTIONS
-        if (!geometryClassInstance) {
-            console.error(`Geometry class ${geometryClass} not found.`);
-            return -1;
-        }
-
-        if (geometryClassInstance.prototype instanceof THREE.BufferGeometry === false) {
-            console.error(`Geometry class ${geometryClass} is not a BufferGeometry.`);
-            return -1;
-        }
-
-        if (!materialClassInstance) {
-            console.error(`Material class ${materialClass} not found.`);
-            return -1;
-        }
-
-        if (materialClassInstance.prototype instanceof THREE.Material === false) {
-            console.error(`Material class ${materialClass} is not a Material.`);
-            return -1;
-        }
-        // @endif
-
         try {
             const geometry: THREE.BufferGeometry = new geometryClassInstance();
-            const material: THREE.Material = new materialClassInstance();
+            const material: THREE.Material = new materialClassInstance({ color: 0xffffff });
             const mesh: THREE.Object3D = new THREE.Mesh(geometry, material);
 
             const id = __nextObjId;
@@ -89,7 +69,7 @@ export const createContext = () => {
         }
 
         const texture = await textureLoader.loadAsync(path);
-        
+
         if (rows || columns) {
             texture.userData.rows = rows;
             texture.userData.columns = columns;
@@ -262,7 +242,7 @@ export const createContext = () => {
             return -1;
         }
 
-        texture.offset.set(frameX / columns, 1 - (frameY + 1) / rows);
+        texture.offset.set(frameX / columns, frameY / rows);
 
         return 0;
     }
@@ -309,14 +289,42 @@ export const createContext = () => {
         return 0;
     }
 
+    /**
+     * Initializes the Three.js context with a renderer, scene, and camera.
+     * @param target - The HTML element to attach the renderer's canvas to.
+     */
     function init(
-        camera: THREE.PerspectiveCamera,
-        scene: THREE.Scene,
-        renderer: THREE.WebGLRenderer
+        target: HTMLElement,
     ) {
-        __camera = camera;
-        __scene = scene;
-        __renderer = renderer;
+        __camera = new THREE.PerspectiveCamera(75, target.clientWidth / target.clientHeight, 0.1, 1000);
+        __scene = new THREE.Scene();
+        __renderer = new THREE.WebGLRenderer({ antialias: true });
+
+        __renderer.setSize(target.clientWidth, target.clientHeight);
+        target.appendChild(__renderer.domElement);
+    }
+
+    /** 
+     * Sets the background color of the scene.
+     */
+    function setBg(color: number) {
+        if (!__scene) {
+            console.error("Scene is not initialized.");
+            return -1;
+        }
+        __scene.background = new THREE.Color(color);
+        return 0;
+    }
+
+    function render() {
+        if (!__renderer || !__scene || !__camera) {
+            console.error("Renderer, scene, or camera is not initialized.");
+            return -1;
+        }
+
+        __renderer.render(__scene, __camera);
+
+        return 0;
     }
 
     return {
@@ -326,18 +334,21 @@ export const createContext = () => {
         setPosition,
         setRotation,
         setScale,
+        setBg,
         addObjectToScene,
         removeObjectFromScene,
         setSpriteAnimationOffset,
+        // camera
         setCameraPosition,
         cameraLookAt,
         init,
+        // rendering
+        render,
         __OBJECTS,
         __TEXTURES,
         __LOADED_TEXTURES,
         textureLoader
     }
-
 }
 
 /** CLASSES */

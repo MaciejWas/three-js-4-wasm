@@ -179,7 +179,7 @@ describe('setSpriteAnimationOffset', () => {
         expect(retcode).toBe(0);
     })
 
-    test("200x200 img, 4x4 cols/rows, offset 0,0 => 0px, 0px", async () => {
+    test("200x200 img, 3x3 cols/rows, anim=0,0 => offset=0,0", async () => {
         const { lib, spriteObjectId } = await createSpriteFixture(3, 3);
         lib.setSpriteAnimationOffset(spriteObjectId, 0, 0);
         const object = lib.__OBJECTS.get(spriteObjectId) as THREE.Sprite;
@@ -190,28 +190,28 @@ describe('setSpriteAnimationOffset', () => {
         expect(object.material.map!.offset.y).toBe(0);
     });
 
-    test("200x200 img, 4x4 cols/rows, offset 0,1 => 0px, 50px", async () => {
+    test("200x200 img, 4x4 cols/rows, anim=0,1 => offset=0.0,0.25", async () => {
         const { lib, spriteObjectId } = await createSpriteFixture(4, 4);
         lib.setSpriteAnimationOffset(spriteObjectId, 0, 1);
         const object = lib.__OBJECTS.get(spriteObjectId) as THREE.Sprite;
-        expect(object.material.map!.offset.x).toBe(0);
-        expect(object.material.map!.offset.y).toBe(50);
+        expect(object.material.map!.offset.x).toBe(0.0);
+        expect(object.material.map!.offset.y).toBe(0.25);
     })
 
-    test("200x200 img, 4x4 cols/rows, offset 1,1 => 50px, 50px", async () => {
+    test("200x200 img, 4x4 cols/rows, anim=1,1 => 0.25,0.25", async () => {
         const { lib, spriteObjectId } = await createSpriteFixture(4, 4);
         lib.setSpriteAnimationOffset(spriteObjectId, 1, 1);
         const object = lib.__OBJECTS.get(spriteObjectId) as THREE.Sprite;
-        expect(object.material.map!.offset.x).toBe(50);
-        expect(object.material.map!.offset.y).toBe(50);
+        expect(object.material.map!.offset.x).toBe(0.25);
+        expect(object.material.map!.offset.y).toBe(0.25);
     })
 
-    test("200x200 img, 4x4 cols/rows, offset 1,2 => 50px, 100px", async () => {
+    test("200x200 img, 4x4 cols/rows, anim=1,2 => offset=0.25,1.0", async () => {
         const { lib, spriteObjectId } = await createSpriteFixture(4, 4);
         lib.setSpriteAnimationOffset(spriteObjectId, 1, 2);
         const object = lib.__OBJECTS.get(spriteObjectId) as THREE.Sprite;
-        expect(object.material.map!.offset.x).toBe(50);
-        expect(object.material.map!.offset.y).toBe(100);
+        expect(object.material.map!.offset.x).toBe(0.25);
+        expect(object.material.map!.offset.y).toBe(0.5);
     })
 });
 
