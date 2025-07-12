@@ -1,12 +1,10 @@
 {
   "name": "three-js-4-wasm",
+  "type": "module",
   "version": "0.0.1",
   "description": "Thin wrapper aroung THREE.js which can be easily called from WASM",
   "main": "index.ts",
-  "scripts": {
-    "build": "tsc --outDir dist --target es6 --module commonjs --declaration index.ts"
-  },
-  "author": "",
+  "author": "Maciej Wasilewski",
   "license": "MIT",
   "dependencies": {
     "three": "^0.177.0"
@@ -14,11 +12,7 @@
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/three": "^0.177.0",
-    "jest": "^30.0.3",
-    "jest-environment-jsdom": "^30.0.2",
     "jsdom": "^26.1.0",
-    "node-fetch": "^3.3.2",
-    "ts-jest": "^29.4.0",
     "typescript": "^5.8.3",
     "vite": "^7.0.4",
     "vitest": "^3.2.4"
