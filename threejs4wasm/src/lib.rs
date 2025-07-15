@@ -25,6 +25,12 @@ pub enum GeometryClass {
     TorusGeometry = 2006,
 }
 
+#[repr(C)]
+pub struct TwoI16 {
+    pub x: i16,
+    pub y: i16,
+}
+
 // External JavaScript functions provided in your JS runtime environment
 unsafe extern "C" {
     pub fn createObject(geometry: GeometryClass, material: MaterialClass) -> i32;
@@ -38,10 +44,47 @@ unsafe extern "C" {
     pub fn setSpriteAnimationOffset(object_id: i32, frame_x: i32, frame_y: i32) -> i32;
     pub fn setCameraPosition(x: f32, y: f32, z: f32) -> i32;
     pub fn cameraLookAt(x: f32, y: f32, z: f32) -> i32;
+
+    pub fn getKeysPressed() -> KeysPressed;
+    pub fn getMouseMovement() -> TwoI16;
+
     pub fn render() -> i32;
 }
 
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct KeysPressed(u32);
+
+impl KeysPressed {
+    #[inline(always)]
+    pub fn wsad_pressed(&self) -> bool {
+        (self.0 & 0b0000_0000_0000_1111) != 0
+    }
+
+    #[inline(always)]
+    pub fn a_pressed(&self) -> bool {
+        (self.0 & 0b0000_0000_0000_0001) != 0
+    }
+
+    #[inline(always)]
+    pub fn s_pressed(&self) -> bool {
+        (self.0 & 0b0000_0000_0000_0010) != 0
+    }
+
+    #[inline(always)]
+    pub fn d_pressed(&self) -> bool {
+        (self.0 & 0b0000_0000_0000_0100) != 0
+    }
+
+    #[inline(always)]
+    pub fn w_pressed(&self) -> bool {
+        (self.0 & 0b0000_0000_0000_1000) != 0
+    }
+}
+
 pub mod ctx {
+    use crate::KeysPressed;
+
     pub fn create_object(geometry: super::GeometryClass, material: super::MaterialClass) -> i32 {
         unsafe { super::createObject(geometry, material) }
     }
@@ -77,5 +120,11 @@ pub mod ctx {
     }
     pub fn render() -> i32 {
         unsafe { super::render() }
+    }
+    pub fn get_keys_pressed() -> KeysPressed {
+        unsafe { super::getKeysPressed() }
+    }
+    pub fn get_mouse_movement() -> super::TwoI16 {
+        unsafe { super::getMouseMovement() }
     }
 }

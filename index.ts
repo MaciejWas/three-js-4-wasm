@@ -23,6 +23,62 @@ export const createContext = () => {
     const utf8Decoder = new TextDecoder("utf-8");
     const textureLoader = new THREE.TextureLoader();
 
+    /** INPUT HANDLING */
+
+    /** Bitmask. Every bit is some key */
+    let keysPressed: number = 0;
+
+    /** u32 (i16 + i16). First number is X dir, second number is Y dir */
+    let mouseMovement: number = 0;
+
+    function packU16sToU32(low: number, high: number) {
+        return (high << 16) | (low & 0xFFFF);
+    }
+
+    function onMouseMove(ev: MouseEvent) {
+        mouseMovement = packU16sToU32(ev.x, ev.y);
+    }
+
+    function onKeyUp(ev: KeyboardEvent) {
+        const pressed: number = keys[ev.key];
+        // remove the value from the keysPressed bitmask
+        if (pressed) {
+            keysPressed &= ~pressed;
+        }
+    }
+
+    function onKeyDown(ev: KeyboardEvent) {
+        const pressed: number = keys[ev.key];
+        // add the value to the keysPressed bitmask
+        if (pressed) {
+            keysPressed |= pressed;
+        }
+    }
+
+    function initInputListeners() {
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('keydown', onKeyDown);
+        window.addEventListener('keyup', onKeyUp);
+    }
+
+
+    function getKeysPressed(): number {
+        return keysPressed;
+    }
+
+    /**
+     * Returns the mouse movement since the last call to this function.
+     * The value is a packed u32 where the first 16 bits represent the X movement
+     * and the next 16 bits represent the Y movement.
+     * 
+     * This function resets the mouse movement value to zero after retrieving it.
+     */
+    function getMouseMovement(): number {
+        const ret = mouseMovement;
+        mouseMovement = 0;
+        return ret;
+    }
+
     /* BINDINGS */
 
     /** Initialized a THREE.Mesh object. It is not added to scene by default.
@@ -353,12 +409,34 @@ export const createContext = () => {
         setCameraPosition,
         cameraLookAt,
         init,
+        // input
+        getKeysPressed,
+        getMouseMovement,
+        initInputListeners,
         // rendering
         render,
         __OBJECTS,
         __TEXTURES,
         __LOADED_TEXTURES,
-        textureLoader
+        textureLoader,
+
+        createWasmEnv() {
+            const exports: any = {};
+            exports.createObject = createObject;
+            exports.createSprite = createSprite;
+            exports.setPosition = setPosition;
+            exports.setRotation = setRotation;
+            exports.setScale = setScale;
+            exports.setBg = setBg;
+            exports.addObjectToScene = addObjectToScene;
+            exports.removeObjectFromScene = removeObjectFromScene;
+            exports.setSpriteAnimationOffset = setSpriteAnimationOffset;
+            exports.setCameraPosition = setCameraPosition;
+            exports.cameraLookAt = cameraLookAt;
+            exports.getKeysPressed = getKeysPressed;
+            exports.getMouseMovement = getMouseMovement;
+            return exports
+        }
     }
 }
 
@@ -384,4 +462,13 @@ export enum GeometryClass {
     CylinderGeometry = 2004,
     ConeGeometry = 2005,
     TorusGeometry = 2006,
+}
+
+/** INPUT */
+const keys: Record<string, number> = {
+    w: 1 << 0,
+    a: 1 << 1,
+    s: 1 << 2,
+    d: 1 << 3,
+    space: 1 << 4,
 }
