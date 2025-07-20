@@ -1,3 +1,6 @@
+#![allow(unused_unsafe)]
+#![allow(non_snake_case)]
+
 #[repr(i32)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MaterialClass {
@@ -32,6 +35,7 @@ pub struct TwoI16 {
 }
 
 // External JavaScript functions provided in your JS runtime environment
+#[cfg(target_arch="wasm32")]
 unsafe extern "C" {
     pub fn createObject(geometry: GeometryClass, material: MaterialClass) -> i32;
     pub fn createSprite(texture_id: i32) -> i32;
@@ -44,12 +48,62 @@ unsafe extern "C" {
     pub fn setSpriteAnimationOffset(object_id: i32, frame_x: i32, frame_y: i32) -> i32;
     pub fn setCameraPosition(x: f32, y: f32, z: f32) -> i32;
     pub fn cameraLookAt(x: f32, y: f32, z: f32) -> i32;
-
     pub fn getKeysPressed() -> KeysPressed;
     pub fn getMouseMovement() -> TwoI16;
-
     pub fn render() -> i32;
 }
+
+mod test {
+    #![allow(unused)]
+
+    use super::*;
+    // a macro which takes a function name and returns a test function
+    pub fn createObject(geometry: GeometryClass, material: MaterialClass) -> i32 {
+        0
+    }
+    pub fn createSprite(texture_id: i32) -> i32 {
+        0
+    }
+    pub fn setPosition(object_id: i32, x: f32, y: f32, z: f32) -> i32 {
+        0
+    }
+    pub fn setRotation(object_id: i32, x: f32, y: f32, z: f32) -> i32 {
+        0
+    }
+    pub fn setScale(object_id: i32, x: f32, y: f32, z: f32) -> i32 {
+        0
+    }
+    pub fn setBg(color: i32) -> i32 {
+        0
+    }
+    pub fn addObjectToScene(object_id: i32) -> i32 {
+        0
+    }
+    pub fn removeObjectFromScene(object_id: i32) -> i32 {
+        0
+    }
+    pub fn setSpriteAnimationOffset(object_id: i32, frame_x: i32, frame_y: i32) -> i32 {
+        0
+    }
+    pub fn setCameraPosition(x: f32, y: f32, z: f32) -> i32 {
+        0
+    }
+    pub fn cameraLookAt(x: f32, y: f32, z: f32) -> i32 {
+        0
+    }
+    pub fn getKeysPressed() -> KeysPressed {
+        KeysPressed(0)
+    }
+    pub fn getMouseMovement() -> TwoI16 {
+        TwoI16 { x: 0, y: 0 }
+    }
+    pub fn render() -> i32 {
+        0
+    }
+}
+
+#[cfg(not(target_arch="wasm32"))]
+use test::*;
 
 #[repr(C)]
 #[derive(Clone, Copy)]
