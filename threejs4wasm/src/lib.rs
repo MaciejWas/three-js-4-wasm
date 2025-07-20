@@ -33,6 +33,14 @@ pub struct TwoI16 {
     pub x: i16,
     pub y: i16,
 }
+impl From<i32> for TwoI16 {
+    fn from(value: i32) -> Self {
+        TwoI16 {
+            x: (value & 0xFFFF) as i16,
+            y: ((value >> 16) & 0xFFFF) as i16,
+        }
+    }
+}
 
 // External JavaScript functions provided in your JS runtime environment
 #[cfg(target_arch="wasm32")]
@@ -49,7 +57,7 @@ unsafe extern "C" {
     pub fn setCameraPosition(x: f32, y: f32, z: f32) -> i32;
     pub fn cameraLookAt(x: f32, y: f32, z: f32) -> i32;
     pub fn getKeysPressed() -> KeysPressed;
-    pub fn getMouseMovement() -> TwoI16;
+    pub fn getMouseMovement() -> i32;
     pub fn render() -> i32;
 }
 
@@ -94,8 +102,8 @@ mod test {
     pub fn getKeysPressed() -> KeysPressed {
         KeysPressed(0)
     }
-    pub fn getMouseMovement() -> TwoI16 {
-        TwoI16 { x: 0, y: 0 }
+    pub fn getMouseMovement() -> i32 {
+        0
     }
     pub fn render() -> i32 {
         0
@@ -179,6 +187,6 @@ pub mod ctx {
         unsafe { super::getKeysPressed() }
     }
     pub fn get_mouse_movement() -> super::TwoI16 {
-        unsafe { super::getMouseMovement() }
+        unsafe { super::getMouseMovement().into() }
     }
 }

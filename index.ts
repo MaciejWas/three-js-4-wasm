@@ -29,14 +29,16 @@ export const createContext = () => {
     let keysPressed: number = 0;
 
     /** u32 (i16 + i16). First number is X dir, second number is Y dir */
-    let mouseMovement: number = 0;
+    let mouseMovementX: number = 0;
+    let mouseMovementY: number = 0;
 
     function packU16sToU32(low: number, high: number) {
         return (high << 16) | (low & 0xFFFF);
     }
 
     function onMouseMove(ev: MouseEvent) {
-        mouseMovement = packU16sToU32(ev.x, ev.y);
+        mouseMovementX += ev.movementX;
+	mouseMovementY += ev.movementY;
     }
 
     function onKeyUp(ev: KeyboardEvent) {
@@ -74,8 +76,9 @@ export const createContext = () => {
      * This function resets the mouse movement value to zero after retrieving it.
      */
     function getMouseMovement(): number {
-        const ret = mouseMovement;
-        mouseMovement = 0;
+        const ret = packU16sToU32(mouseMovementX, mouseMovementY);
+        mouseMovementX = 0;
+	mouseMovementY = 0;
         return ret;
     }
 
