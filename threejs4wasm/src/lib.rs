@@ -56,7 +56,7 @@ unsafe extern "C" {
     pub fn setSpriteAnimationOffset(object_id: i32, frame_x: i32, frame_y: i32) -> i32;
     pub fn setCameraPosition(x: f32, y: f32, z: f32) -> i32;
     pub fn cameraLookAt(x: f32, y: f32, z: f32) -> i32;
-    pub fn getKeysPressed() -> KeysPressed;
+    pub fn getKeysPressed() -> i32;
     pub fn getMouseMovement() -> i32;
     pub fn render() -> i32;
 }
@@ -99,8 +99,8 @@ mod test {
     pub fn cameraLookAt(x: f32, y: f32, z: f32) -> i32 {
         0
     }
-    pub fn getKeysPressed() -> KeysPressed {
-        KeysPressed(0)
+    pub fn getKeysPressed() -> i32 {
+        0
     }
     pub fn getMouseMovement() -> i32 {
         0
@@ -115,7 +115,13 @@ use test::*;
 
 #[repr(C)]
 #[derive(Clone, Copy)]
-pub struct KeysPressed(u32);
+pub struct KeysPressed(i32);
+
+impl From<i32> for KeysPressed {
+    fn from(value: i32) -> Self {
+        KeysPressed(value)
+    }
+}
 
 impl KeysPressed {
     #[inline(always)]
@@ -184,7 +190,7 @@ pub mod ctx {
         unsafe { super::render() }
     }
     pub fn get_keys_pressed() -> KeysPressed {
-        unsafe { super::getKeysPressed() }
+        unsafe { super::getKeysPressed().into() }
     }
     pub fn get_mouse_movement() -> super::TwoI16 {
         unsafe { super::getMouseMovement().into() }
