@@ -38,7 +38,7 @@ export const createContext = () => {
 
     function onMouseMove(ev: MouseEvent) {
         mouseMovementX += ev.movementX;
-	mouseMovementY += ev.movementY;
+        mouseMovementY += ev.movementY;
     }
 
     function onKeyUp(ev: KeyboardEvent) {
@@ -78,7 +78,7 @@ export const createContext = () => {
     function getMouseMovement(): number {
         const ret = packU16sToU32(mouseMovementX, mouseMovementY);
         mouseMovementX = 0;
-	mouseMovementY = 0;
+        mouseMovementY = 0;
         return ret;
     }
 
