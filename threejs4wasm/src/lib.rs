@@ -114,44 +114,72 @@ mod test {
 use test::*;
 
 #[repr(C)]
-#[derive(Clone, Copy)]
-pub struct KeysPressed(i32);
+#[derive(Clone, Copy, Default, PartialEq, Eq)]
+pub struct KeysSet(pub i32);
 
-impl From<i32> for KeysPressed {
+impl From<i32> for KeysSet {
     fn from(value: i32) -> Self {
-        KeysPressed(value)
+        KeysSet(value)
     }
 }
 
-impl KeysPressed {
+impl KeysSet {
     #[inline(always)]
-    pub fn wsad_pressed(&self) -> bool {
+    pub fn diff(&self, other: &KeysSet) -> KeysSet {
+        KeysSet(self.0  & !other.0)
+    }
+
+    pub fn and(&self, other: &KeysSet) -> KeysSet {
+        KeysSet(self.0 & other.0)
+    }
+
+    pub fn or(&self, other: &KeysSet) -> KeysSet {
+        KeysSet(self.0 | other.0)
+    }
+
+    pub fn any(&self) -> bool {
+        self.0 != 0
+    }
+
+    #[inline(always)]
+    pub fn wsad(&self) -> bool {
         (self.0 & 0b0000_0000_0000_1111) != 0
     }
 
     #[inline(always)]
-    pub fn a_pressed(&self) -> bool {
+    pub fn a(&self) -> bool {
         (self.0 & 0b0000_0000_0000_0001) != 0
     }
 
     #[inline(always)]
-    pub fn s_pressed(&self) -> bool {
+    pub fn s(&self) -> bool {
         (self.0 & 0b0000_0000_0000_0010) != 0
     }
 
     #[inline(always)]
-    pub fn d_pressed(&self) -> bool {
+    pub fn d(&self) -> bool {
         (self.0 & 0b0000_0000_0000_0100) != 0
     }
 
     #[inline(always)]
-    pub fn w_pressed(&self) -> bool {
+    pub fn w(&self) -> bool {
         (self.0 & 0b0000_0000_0000_1000) != 0
+    }
+
+    #[inline(always)]
+    pub fn space(&self) -> bool {
+        (self.0 & 0b0000_0000_0001_0000) != 0
+    }
+}
+
+impl core::fmt::Debug for KeysSet {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "KeysSet({:016b})", self.0)
     }
 }
 
 pub mod ctx {
-    use crate::KeysPressed;
+    use crate::KeysSet;
 
     pub fn create_object(geometry: super::GeometryClass, material: super::MaterialClass) -> i32 {
         unsafe { super::createObject(geometry, material) }
@@ -189,7 +217,7 @@ pub mod ctx {
     pub fn render() -> i32 {
         unsafe { super::render() }
     }
-    pub fn get_keys_pressed() -> KeysPressed {
+    pub fn get_keys_pressed() -> KeysSet {
         unsafe { super::getKeysPressed().into() }
     }
     pub fn get_mouse_movement() -> super::TwoI16 {
