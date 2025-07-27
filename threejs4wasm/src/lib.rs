@@ -29,6 +29,7 @@ pub enum GeometryClass {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Default, PartialEq, Eq)]
 pub struct TwoI16 {
     pub x: i16,
     pub y: i16,
@@ -43,7 +44,7 @@ impl From<i32> for TwoI16 {
 }
 
 // External JavaScript functions provided in your JS runtime environment
-#[cfg(target_arch="wasm32")]
+#[cfg(target_arch = "wasm32")]
 unsafe extern "C" {
     pub fn createObject(geometry: GeometryClass, material: MaterialClass) -> i32;
     pub fn createSprite(texture_id: i32) -> i32;
@@ -110,7 +111,7 @@ mod test {
     }
 }
 
-#[cfg(not(target_arch="wasm32"))]
+#[cfg(not(target_arch = "wasm32"))]
 use test::*;
 
 #[repr(C)]
@@ -124,9 +125,15 @@ impl From<i32> for KeysSet {
 }
 
 impl KeysSet {
+    pub const A: i32 = 0b0000_0000_0000_0001;
+    pub const S: i32 = 0b0000_0000_0000_0010;
+    pub const D: i32 = 0b0000_0000_0000_0100;
+    pub const W: i32 = 0b0000_0000_0000_1000;
+    pub const SPACE: i32 = 0b0000_0000_0001_0000;
+
     #[inline(always)]
     pub fn diff(&self, other: &KeysSet) -> KeysSet {
-        KeysSet(self.0  & !other.0)
+        KeysSet(self.0 & !other.0)
     }
 
     pub fn and(&self, other: &KeysSet) -> KeysSet {
@@ -148,22 +155,22 @@ impl KeysSet {
 
     #[inline(always)]
     pub fn a(&self) -> bool {
-        (self.0 & 0b0000_0000_0000_0001) != 0
+        (self.0 & Self::A) != 0
     }
 
     #[inline(always)]
     pub fn s(&self) -> bool {
-        (self.0 & 0b0000_0000_0000_0010) != 0
+        (self.0 & Self::S) != 0
     }
 
     #[inline(always)]
     pub fn d(&self) -> bool {
-        (self.0 & 0b0000_0000_0000_0100) != 0
+        (self.0 & Self::D) != 0
     }
 
     #[inline(always)]
     pub fn w(&self) -> bool {
-        (self.0 & 0b0000_0000_0000_1000) != 0
+        (self.0 & Self::W) != 0
     }
 
     #[inline(always)]
